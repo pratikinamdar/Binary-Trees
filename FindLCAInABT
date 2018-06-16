@@ -1,0 +1,192 @@
+
+#include <iostream>
+#include<queue>
+#include<stack>
+
+using namespace std;
+class node 
+{
+    public:
+  node *left;
+  node *right;
+  int data;
+};
+node* getNewNode(int data);
+
+node * insert(node* root, int data)
+{
+    if(root == NULL)
+    {
+        root=getNewNode(data);
+    }
+    else
+    {
+        if(data<=root->data)
+    {
+        root->left=insert(root->left, data);
+    }
+    else
+    {
+        root->right=insert(root->right, data);
+    }
+}
+    return root;
+}
+
+node* getNewNode(int data)
+{
+    node * temp = new node();
+    temp->data = data;
+    temp->left = NULL;
+    temp->right = NULL;
+    return temp;
+}
+node* findMinimum(node* root)
+{
+    if(root->left == NULL) return root;
+    else
+    findMinimum(root->left);
+}
+
+
+void display(node* root)
+{
+    queue<node*> q;
+    int nodeCount = 0;
+    node* temp;
+    if(root==NULL)
+    {
+        return;
+    }
+    else
+    {
+        
+        q.push(root);
+        
+        while(1)
+        {
+            nodeCount = q.size();
+            if(nodeCount==0) return;
+            
+        while(nodeCount>0)
+        {
+            
+         temp = q.front();
+         q.pop(); 
+         cout<<temp->data<<"\t";
+         if(temp->left!=NULL)
+         {
+             q.push(temp->left);
+             
+         }
+         if(temp->right!=NULL)
+         {
+             q.push(temp->right);
+            
+         }
+         nodeCount--;
+        }
+        cout<<endl;
+        }
+    }
+    
+}
+
+node* deleteNode(node* root, int data)
+{
+    if(root ==NULL) return root;
+    else if(root->data<data) root->right = deleteNode(root->right, data);
+    else if(root->data>data) root->left = deleteNode(root->left, data);
+    else if (root->data == data)
+    {
+        if(root->left == NULL && root->right == NULL)
+        {
+            delete(root);
+            root=NULL;
+        }
+        else if(root->left==NULL)
+        {
+            node * temp = root;
+            root = root->right;
+            free(root);
+        }
+        else if(root->right == NULL)
+        {
+            node *temp = root;
+            root = root->left;
+            free(root);
+        }
+        else if(root->left!=NULL && root->right!=NULL)
+        {
+            node *temp = findMinimum(root->right);
+            root->data = temp->data;
+            root->right = deleteNode(root->right, temp->data);
+        }
+    }
+    
+    return root;
+}
+
+bool searchBst(node* root, int data)
+{
+    if(root == NULL) return false;
+    else if(root->data == data) return true;
+    else if(root->data<data) searchBst(root->right, data);
+    else if(root->data>data) searchBst(root->left, data);
+}
+
+node* lca(node* root, int ll, int rr, bool &le, bool &ri)
+{
+    if(root == NULL) return root;
+    if(root->data == ll)
+    {
+        le = true;
+        return root;
+    }
+    if(root->data == rr) 
+    {
+        ri = true;
+        return root;
+    }
+    
+    node *left = lca(root->left, ll, rr, le, ri);
+    node* right = lca(root->right, ll, rr, le, ri);
+    
+    if(left==NULL && right == NULL)return NULL;
+    
+    if(left!=NULL && right!=NULL) return root;
+    if(left!=NULL) return left;
+    if(right!=NULL) return right;
+}
+
+bool find(node* root, int val)
+{
+    if(root == NULL) return false;
+    return (root->data==val || find(root->left, val) || find(root->right, val));
+    
+}
+
+int main()
+{
+    node* root = NULL;
+    root = insert(root, 15);
+    root = insert(root, 10);
+    root = insert(root, 20);
+    root = insert(root, 25);
+    root = insert(root, 17);
+    root = insert(root, 8);
+    root = insert(root, 12);
+    display(root);
+    cout<<"lca"<<endl;
+   static bool le = false;
+   static bool ri = false;
+    int ll = 20;
+    int rr = 10;
+   node * temp = lca(root,ll, rr, le, ri);
+
+  if((le && ri) || (le&&find(root, rr)) || (ri&&find(root, ll)) )
+   cout<< temp->data;
+  else 
+  cout<< "NULL";
+  return 0;
+}
